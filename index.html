@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>森林管理ツール</title>
+    <link rel="icon" href="./favicon.ico" />
+    <!-- Leaflet / Draw の CSS（CDNを利用） -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" crossorigin="anonymous" />
+
+    <style>
+      /* 読み込み中オーバーレイ（全画面・最小） */
+      #busy {
+        position: fixed; inset: 0; display: none; place-items: center;
+        background: rgba(0,0,0,.35); z-index: 9999; backdrop-filter: blur(2px);
+      }
+      #busy.show { display: grid; }
+      .spinner {
+        width: 48px; height: 48px; border-radius: 50%;
+        border: 5px solid rgba(255,255,255,.3); border-top-color: #fff;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      #busy p { color:#fff; margin-top:12px; font: 14px/1.4 system-ui, sans-serif; text-shadow: 0 1px 2px rgba(0,0,0,.6);}
+    </style>
+  <script type="module" crossorigin src="/si_sample2/assets/index-Bmj_S0sl.js"></script>
+  <link rel="stylesheet" crossorigin href="/si_sample2/assets/index-D-o8q_NZ.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>森林管理ツール</h1>
+        </header>
+        <main>
+            <div id="map"></div>
+  
+  <!-- Layers UI は右カラムのカードに集約（UIのみ変更・機能不変） -->
+            
+            <!-- ヘッダ右上：密度/ハイコントラスト切替は任意 -->
+            <div class="toolbar-top">
+              <button id="btnCollapse" class="icon-btn" aria-label="サイドパネルを折りたたむ">⟨</button>
+              <!-- 表示密度/高コントラストのトグルは撤去（2025-09-13） -->
+            </div>
+
+            <!-- 右パネル：レイヤ読込・リスト・表示設定・出力 -->
+            <aside id="side" class="side">
+
+              <!-- 読込：ドラッグ&ドロップ対応 -->
+              <section class="card">
+                <header class="card-h"><span class="card-t">レイヤ読込</span></header>
+
+                <div id="dropGeo" class="dropzone" aria-label="GeoTIFFドロップ領域">
+                  <div class="dz-body">
+                    <strong>GeoTIFF</strong>
+                    <small>.tif / .tiff をドロップ or クリック</small>
+                    <input id="geotiffInput" type="file" accept=".tif,.tiff" hidden />
+                    <button class="btn ghost sm" data-bind="open-geo">ファイルの選択</button>
+                  </div>
+                  <div class="progress" aria-live="polite" hidden>
+                    <div class="bar" style="width:0%"></div><span class="pct">0%</span>
+                  </div>
+                </div>
+
+                <div id="dropShp" class="dropzone" aria-label="Shapefile(ZIP)ドロップ領域">
+                  <div class="dz-body">
+                    <strong>Shapefile (ZIP)</strong>
+                    <small>.zip をドロップ or クリック</small>
+                    <input id="shpZipInput" type="file" accept=".zip" hidden aria-label="Shapefile（ZIP）を選択" title="Shapefile（ZIP）を選択">
+                    <button class="btn ghost sm" data-bind="open-shp">ファイルの選択</button>
+                  </div>
+                  <div class="progress" aria-live="polite" hidden>
+                    <div class="bar" style="width:0%"></div><span class="pct">0%</span>
+                  </div>
+                </div>
+              </section>
+
+              <!-- レイヤーパネル（旧UI＋透過スライダー）は削除しました -->
+
+              <section class="card">
+                <header class="card-h"><span class="card-t">メンテナンス</span></header>
+                <button id="btnClearLocal" class="btn danger block">ローカルデータをクリア</button>
+              </section>
+            </aside>
+
+            <!-- ショートカットの簡易ヘルプ（必要に応じて表示） -->
+            <div id="hotkeyHelp" class="toast" hidden>
+              O:開く / L:レイヤ / E:出力 / Delete:削除 / ?:このヘルプ
+            </div>
+
+            <!-- 画面下：簡易ステータス -->
+            <div id="statusbar" class="status">
+              <span id="st-scale">1:—</span>
+              <span id="st-crs">CRS: —</span>
+              <span id="st-xy">X: — , Y: —</span>
+            </div>
+        </main>
+    </div>
+    <!-- 読み込み中オーバーレイ -->
+    <div id="busy" aria-live="polite" aria-busy="true">
+      <div style="display:flex; flex-direction:column; align-items:center;">
+        <div class="spinner" role="progressbar" aria-label="loading"></div>
+        <p>画像を処理中…</p>
+      </div>
+    </div>
+    
+    <!-- Leaflet / Draw の本体（CDN）。先に読み込む -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js" crossorigin="anonymous"></script>
+
+    <script>
+      // 安全ガード：もし他スクリプトが vp を参照しても壊れないように
+      window.vp = window.vp || function (fn) {
+        try { return (typeof fn === 'function') ? fn() : fn; } catch (e) { console.error(e); }
+      };
+    </script>
+
+    <!-- labels: field-labels.json を用いて Popup/Tooltip 表示前にキー名→日本語ラベルへ置換 -->
+
+    <!-- 透過制御は main.js（registry + 委譲、0..1 スケール）に集約 -->
+
+</body>
+</html>

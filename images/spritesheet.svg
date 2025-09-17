@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="30">
+  <!-- This is a placeholder SVG spritesheet for leaflet-draw -->
+  <!-- In a real implementation, this would contain the actual toolbar icons -->
+  <rect width="300" height="30" fill="#919187"/>
+  <!-- Add simple shapes to represent the different tools -->
+  <circle cx="15" cy="15" r="8" fill="#ffffff"/>
+  <polygon points="45,7 60,23 30,23" fill="#ffffff"/>
+  <rect x="70" y="7" width="16" height="16" fill="#ffffff"/>
+  <circle cx="105" cy="15" r="8" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+  <polygon points="135,7 150,23 120,23" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+  <rect x="160" y="7" width="16" height="16" fill="#ffffff" stroke="#000000" stroke-width="1"/>
+  <line x1="190" y1="7" x2="206" y2="23" stroke="#ffffff" stroke-width="2"/>
+  <line x1="206" y1="7" x2="190" y2="23" stroke="#ffffff" stroke-width="2"/>
+  <line x1="225" y1="7" x2="225" y2="23" stroke="#ffffff" stroke-width="2"/>
+  <line x1="217" y1="15" x2="233" y2="15" stroke="#ffffff" stroke-width="2"/>
+  <polygon points="255,7 270,7 270,23 255,23 255,7" fill="none" stroke="#ffffff" stroke-width="1"/>
+  <polygon points="258,10 267,10 267,20 258,20 258,10" fill="#ffffff"/>
+</svg>
