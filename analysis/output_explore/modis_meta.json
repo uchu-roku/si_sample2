@@ -1,0 +1,8 @@
+{
+  "url": "https://modis.ornl.gov/rst/api/v1/MOD13A2/subset?latitude=43.309&longitude=141.856&startDate=A2024177&endDate=A2024241&kmAboveBelow=1&kmLeftRight=1",
+  "status_code": 404,
+  "content_type": "application/json",
+  "content_disposition": null,
+  "length": 29,
+  "final_url": "https://modis.ornl.gov/rst/api/v1/MOD13A2/subset?latitude=43.309&longitude=141.856&startDate=A2024177&endDate=A2024241&kmAboveBelow=1&kmLeftRight=1"
+}
